@@ -1,0 +1,86 @@
+{
+  /*
+   * ========================================================
+   * Project 05 - Step 05
+   * TypeScript Configuration
+   * ========================================================
+   *
+   * tsconfig.json 雖然副檔名叫 .json，
+   * TypeScript 支援這種帶 Comment 的設定寫法。
+   *
+   * 所以很接近 JSONC。
+   */
+  "compilerOptions": {
+    /*
+     * 編譯後 JavaScript 使用 ES2022。
+     *
+     * Node.js 24 可以直接執行這些現代 JavaScript 語法。
+     */
+    "target": "ES2022",
+    /*
+     * 使用 Node.js 的 ESM 模組解析方式。
+     *
+     * 搭配 package.json：
+     *
+     *   "type": "module"
+     */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    /*
+     * TypeScript 原始碼目錄。
+     *
+     * src/app.ts
+     */
+    "rootDir": "./src",
+    /*
+     * 編譯後輸出到：
+     *
+     * dist/app.js
+     */
+    "outDir": "./dist",
+    /*
+     * 開啟嚴格 TypeScript 型別檢查。
+     *
+     * 對學習專案建議保持開啟，
+     * 不要靠關閉 strict 來躲避型別錯誤。
+     */
+    "strict": true,
+    /*
+     * 讓 CommonJS 型態套件和 ESM import
+     * 有比較好的相容性。
+     */
+    "esModuleInterop": true,
+    /*
+     * 不產生 .d.ts declaration files。
+     *
+     * 這不是 library 專案，
+     * 所以目前不需要。
+     */
+    "declaration": false,
+    /*
+     * 產生 Source Map。
+     *
+     * 發生 Error 時比較容易對應回 TypeScript 原始碼。
+     */
+    "sourceMap": true,
+    /*
+     * 跳過 node_modules 裡第三方型別定義的完整檢查。
+     *
+     * 可以減少第三方套件型別造成的非必要問題。
+     */
+    "skipLibCheck": true
+  },
+  /*
+   * 只編譯 src 裡面的 TypeScript。
+   */
+  "include": [
+    "src/**/*.ts"
+  ],
+  /*
+   * 明確排除 build output 與 dependencies。
+   */
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

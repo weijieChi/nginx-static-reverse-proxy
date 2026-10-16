@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<!--
+    =========================================================
+    Project 05 - Step 09
+    Custom 50x Error Page
+    =========================================================
+
+    這個頁面會用於：
+
+        HTTP 500
+        HTTP 502
+        HTTP 503
+        HTTP 504
+
+    例如：
+
+        Client
+           ↓
+        Nginx
+           ↓
+        Express ✕
+
+    Nginx 無法正常取得 upstream Response：
+
+        502 Bad Gateway
+
+    然後：
+
+        error_page 500 502 503 504 /50x.html;
+
+    會使用這個 HTML 作為 Response Body。
+
+    重要：
+
+    顯示這個 HTML 不代表 HTTP Status 變成 200。
+
+    Status 仍然可能是：
+
+        502 Bad Gateway
+-->
+
+<html lang="zh-Hant">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Service Temporarily Unavailable
+    </title>
+
+
+    <!--
+        CSS 還是使用 Nginx Static Asset。
+
+        即使 API 已經掛掉，
+        /assets/style.css 並不需要 Express，
+        所以理論上仍然可以正常載入。
+    -->
+    <link
+        rel="stylesheet"
+        href="/assets/style.css"
+    >
+
+</head>
+
+<body>
+
+    <main class="container">
+
+        <h1>
+            Service Error
+        </h1>
+
+        <h2>
+            Backend service is temporarily unavailable.
+        </h2>
+
+        <p>
+            Nginx is running, but the upstream service
+            cannot currently complete the request.
+        </p>
+
+
+        <!--
+            回首頁仍然可以成功，
+            因為首頁是 Nginx Static File，
+            不依賴 Express。
+        -->
+        <p>
+            <a href="/">
+                回首頁
+            </a>
+        </p>
+
+    </main>
+
+</body>
+
+</html>

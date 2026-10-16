@@ -1,0 +1,248 @@
+# ============================================================
+# Project 05 - Step 10
+# Nginx Advanced Feature Lab
+# ============================================================
+#
+# Service：
+#
+#   nginx
+#   api
+#   api1
+#   api2
+#
+#
+# nginx：
+#
+#   唯一對 Host 公開的 Service
+#
+#
+# api：
+#
+#   一般 Reverse Proxy
+#   Timeout Lab
+#   Rate Limit Lab
+#
+#
+# api1 / api2：
+#
+#   Load Balancing Lab
+#
+#
+# 所有 API Container：
+#
+#   使用完全相同程式碼
+#   使用相同 Dockerfile
+#   都監聽 Container :3000
+#
+# 但它們沒有發布 Host Port，
+# 所以彼此都可以使用 3000，
+# 不會發生 Host Port 衝突。
+#
+# ============================================================
+
+
+services:
+
+  # ==========================================================
+  # Main API
+  # ==========================================================
+
+  api:
+
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+
+    environment:
+
+      PORT: "3000"
+
+      NODE_ENV: production
+
+      # 用來辨識目前是哪個 Instance。
+      INSTANCE_NAME: api-main
+
+
+    # --------------------------------------------------------
+    # API Healthcheck
+    # --------------------------------------------------------
+
+    healthcheck:
+
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+
+      interval: 10s
+
+      timeout: 3s
+
+      retries: 3
+
+      start_period: 5s
+
+
+    # 沒有 ports。
+    #
+    # Host 不直接連：
+    #
+    #   localhost:3000
+    #
+    # 只能透過 Compose Network。
+
+
+
+  # ==========================================================
+  # Load Balancing Backend 1
+  # ==========================================================
+
+  api1:
+
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+
+    environment:
+
+      PORT: "3000"
+
+      NODE_ENV: production
+
+      INSTANCE_NAME: api-1
+
+
+    healthcheck:
+
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+
+      interval: 10s
+
+      timeout: 3s
+
+      retries: 3
+
+      start_period: 5s
+
+
+
+  # ==========================================================
+  # Load Balancing Backend 2
+  # ==========================================================
+
+  api2:
+
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+
+    environment:
+
+      PORT: "3000"
+
+      NODE_ENV: production
+
+      INSTANCE_NAME: api-2
+
+
+    healthcheck:
+
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+
+      interval: 10s
+
+      timeout: 3s
+
+      retries: 3
+
+      start_period: 5s
+
+
+
+  # ==========================================================
+  # Nginx
+  # ==========================================================
+
+  nginx:
+
+    image: nginx:1.30.4-alpine
+
+    pull_policy: missing
+
+
+    # --------------------------------------------------------
+    # 整個 Lab 唯一對 Host 公開的 Port。
+    #
+    # Host：
+    #
+    #   localhost:8080
+    #
+    #       ↓
+    #
+    # Nginx：
+    #
+    #   :80
+    #
+    # --------------------------------------------------------
+
+    ports:
+      - "8080:80"
+
+
+    # --------------------------------------------------------
+    # Static Files + Configuration
+    # --------------------------------------------------------
+
+    volumes:
+
+      - ./web:/usr/share/nginx/html:ro
+
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+
+    # --------------------------------------------------------
+    # 等三個 API Instance 都 Healthy 後，
+    # 才啟動 Nginx。
+    #
+    # 對教學 Lab 來說可以避免 Nginx 啟動後，
+    # upstream 還沒準備好的干擾。
+    # --------------------------------------------------------
+
+    depends_on:
+
+      api:
+        condition: service_healthy
+
+      api1:
+        condition: service_healthy
+
+      api2:
+        condition: service_healthy
+
+
+    # --------------------------------------------------------
+    # Nginx 自己的 Liveness。
+    # --------------------------------------------------------
+
+    healthcheck:
+
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://127.0.0.1/health/live >/dev/null 2>&1 || exit 1"
+
+      interval: 10s
+
+      timeout: 3s
+
+      retries: 3
+
+      start_period: 5s

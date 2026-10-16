@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<!--
+    自訂 HTTP 404 頁面。
+
+    Nginx：
+
+        error_page 404 /404.html;
+
+    當資源不存在時，
+    Nginx 會在內部使用這個檔案。
+
+    注意：
+
+    HTTP Status 仍然應該是：
+
+        404 Not Found
+
+    並不是因為成功讀到 404.html
+    就變成 200 OK。
+-->
+
+<html lang="zh-Hant">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        404 - Not Found
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/assets/style.css"
+    >
+
+</head>
+
+<body>
+
+    <main class="container">
+
+        <h1>
+            404
+        </h1>
+
+        <h2>
+            Resource Not Found
+        </h2>
+
+        <p>
+            Nginx 找不到要求的資源。
+        </p>
+
+        <p>
+            <a href="/">
+                回首頁
+            </a>
+        </p>
+
+    </main>
+
+</body>
+
+</html>

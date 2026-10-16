@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="以 Nginx、Docker Compose 與 Express 建立的反向代理及 HTTP 功能互動實驗室。">
+  <meta name="theme-color" content="#0c1925">
+  <title>Nginx Reverse Proxy Lab | Interactive Dashboard</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+
+<body class="dashboard-page">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Nginx Lab 首頁">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="brand-copy"><strong>NGINX LAB</strong><small>REVERSE PROXY / PROJECT 05</small></span>
+      </a>
+      <nav class="top-nav" aria-label="主選單">
+        <a href="#experiments">互動實驗</a>
+        <a href="/docs/">靜態文件 <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-heading">
+        <div class="hero-content">
+          <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> DOCKER COMPOSE · NGINX · EXPRESS 5</p>
+          <h1 id="hero-heading">一個入口。<br><span>七種 HTTP 行為。</span></h1>
+          <p class="hero-lead">從瀏覽器發出真實請求，觀察 Nginx 如何提供靜態資源、轉送 API，以及處理流量、快取與錯誤。</p>
+          <div class="hero-actions">
+            <a class="primary-link" href="#experiments">開始測試 <span aria-hidden="true">↘</span></a>
+            <a class="secondary-link" href="#architecture">查看請求路徑 <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+        <div class="hero-architecture" id="architecture"
+          aria-label="服務架構圖：瀏覽器連到 Nginx，Nginx 提供靜態檔案及代理到三個 Node.js API 容器">
+          <p class="diagram-label">REQUEST FLOW <span class="diagram-label-right">PORT 8080</span></p>
+          <div class="diagram-node diagram-browser"><span
+              class="diagram-icon">◫</span><span><strong>Browser</strong><small>HTTP Client</small></span><span
+              class="diagram-node-tag">01</span></div>
+          <div class="diagram-line"><span>HTTP :8080</span></div>
+          <div class="diagram-node diagram-nginx"><span
+              class="nginx-hex">N</span><span><strong>Nginx</strong><small>Reverse proxy + static</small></span><span
+              class="diagram-node-tag">:80</span></div>
+          <div class="diagram-fork" aria-hidden="true"><span></span><span></span></div>
+          <div class="diagram-targets">
+            <div class="diagram-node diagram-target"><strong>Static</strong><small>HTML / CSS / JS</small></div>
+            <div class="diagram-node diagram-target"><strong>Node.js × 3</strong><small>API / API1 / API2</small></div>
+          </div>
+          <p class="diagram-footnote">Only Nginx exposes a host port. Backend services stay on the Compose network.</p>
+        </div>
+      </section>
+
+      <section class="summary-strip" aria-label="專案摘要">
+        <div><span class="summary-value">01</span><span class="summary-label">PUBLIC ENTRY</span></div>
+        <div><span class="summary-value">03</span><span class="summary-label">API INSTANCES</span></div>
+        <div><span class="summary-value">07</span><span class="summary-label">INTERACTIVE LABS</span></div>
+        <div class="summary-live"><span class="live-dot" aria-hidden="true"></span><span>LIVE
+            RESPONSES<br><small>不是預設測試資料</small></span></div>
+      </section>
+
+      <section class="status-section" aria-labelledby="status-heading">
+        <div class="section-top">
+          <div>
+            <p class="section-kicker">SYSTEM CHECK</p>
+            <h2 id="status-heading">服務狀態</h2>
+          </div>
+          <button id="run-health" class="button button-dark" type="button">檢查服務狀態 <span
+              aria-hidden="true">↗</span></button>
+        </div>
+        <div class="health-grid">
+          <div class="health-card"><span><span class="status-lamp" id="nginx-lamp"
+                data-state="idle"></span><strong>Nginx</strong></span><span id="nginx-health" class="health-value"
+              aria-live="polite">尚未檢查</span><small>GET /health/live</small></div>
+          <div class="health-card"><span><span class="status-lamp" id="api-lamp" data-state="idle"></span><strong>Main
+                API</strong></span><span id="api-health" class="health-value" aria-live="polite">尚未檢查</span><small>GET
+              /health/ready</small></div>
+        </div>
+        <p class="section-note">「Main API」檢查不包含負載平衡用的 api1、api2；初次載入不會假設服務已正常。</p>
+      </section>
+
+      <section class="experiments" id="experiments" aria-labelledby="experiments-heading">
+        <div class="section-top">
+          <div>
+            <p class="section-kicker">INTERACTIVE EXPERIMENTS</p>
+            <h2 id="experiments-heading">在瀏覽器直接測試</h2>
+          </div>
+          <p class="section-description">點擊測試按鈕，觀察真實的 HTTP 回應。<br>所有請求都使用同源路徑，不需要 CORS 設定。</p>
+        </div>
+
+        <div class="lab-grid">
+          <article class="lab-card" aria-labelledby="proxy-heading">
+            <div class="card-head"><span class="card-number">01 / NETWORK</span><span class="feature-symbol"
+                aria-hidden="true">↗</span></div>
+            <h3 id="proxy-heading">Reverse Proxy</h3>
+            <p class="card-copy">透過 Nginx 存取主 API，確認實際到達哪個後端以及轉發的 Headers。</p>
+            <code class="endpoint">GET /api/info</code>
+            <button class="button button-action" id="run-proxy" type="button">發送 API 請求 <span
+                aria-hidden="true">→</span></button>
+            <div class="result-panel" id="result-proxy" role="status" aria-live="polite">
+              <p class="result-placeholder">按下按鈕查看 HTTP 回應。</p>
+            </div>
+          </article>
+
+          <article class="lab-card" aria-labelledby="balance-heading">
+            <div class="card-head"><span class="card-number">02 / DISTRIBUTION</span><span class="feature-symbol"
+                aria-hidden="true">⇄</span></div>
+            <h3 id="balance-heading">Load Balancing</h3>
+            <p class="card-copy">連續發送 8 次請求，觀察 Round Robin 將流量分配給兩個 API Instance。</p>
+            <code class="endpoint">GET /lab/balance</code>
+            <button class="button button-action" id="run-balance" type="button">發送 8 次請求 <span
+                aria-hidden="true">→</span></button>
+            <div class="result-panel" id="result-balance" role="status" aria-live="polite">
+              <p class="result-placeholder">每次回應的 instance 會列在這裡。</p>
+            </div>
+          </article>
+
+          <article class="lab-card" aria-labelledby="rate-heading">
+            <div class="card-head"><span class="card-number">03 / TRAFFIC CONTROL</span><span class="feature-symbol"
+                aria-hidden="true">≋</span></div>
+            <h3 id="rate-heading">Rate Limiting</h3>
+            <p class="card-copy">快速送出 12 次請求，比較允許通過的 200 和超額拒絕的 429。</p>
+            <code class="endpoint">GET /lab/rate</code>
+            <button class="button button-action" id="run-rate" type="button">發送 12 次請求 <span
+                aria-hidden="true">→</span></button>
+            <div class="result-panel" id="result-rate" role="status" aria-live="polite">
+              <p class="result-placeholder">限制設定：2 req/s，burst=3，nodelay。</p>
+            </div>
+          </article>
+
+          <article class="lab-card" aria-labelledby="timeout-heading">
+            <div class="card-head"><span class="card-number">04 / RESILIENCE</span><span class="feature-symbol"
+                aria-hidden="true">◷</span></div>
+            <h3 id="timeout-heading">Proxy Timeout</h3>
+            <p class="card-copy">比較後端延遲 2 秒與 5 秒的回應，觀察 Nginx 設定的 3 秒讀取逾時。</p>
+            <code class="endpoint">GET /lab/timeout?seconds=2|5</code>
+            <div class="button-pair"><button class="button button-action" id="run-timeout-2" type="button">測試 2 秒 <span
+                  aria-hidden="true">→</span></button><button class="button button-outline" id="run-timeout-5"
+                type="button">測試 5 秒 / 504</button></div>
+            <div class="result-panel" id="result-timeout" role="status" aria-live="polite">
+              <p class="result-placeholder">正常情況：2 秒回傳 200，5 秒約 3 秒後回傳 504。</p>
+            </div>
+          </article>
+
+          <article class="lab-card" aria-labelledby="gzip-heading">
+            <div class="card-head"><span class="card-number">05 / PERFORMANCE</span><span class="feature-symbol"
+                aria-hidden="true">⇣</span></div>
+            <h3 id="gzip-heading">Gzip Compression</h3>
+            <p class="card-copy">請求大型文字檔並檢查 Content-Encoding。瀏覽器會自動解壓縮回應內容。</p>
+            <code class="endpoint">GET /lab/gzip/large.txt</code>
+            <button class="button button-action" id="run-gzip" type="button">檢查壓縮 Headers <span
+                aria-hidden="true">→</span></button>
+            <div class="result-panel" id="result-gzip" role="status" aria-live="polite">
+              <p class="result-placeholder">重點觀察 Content-Encoding 與 Vary。</p>
+            </div>
+          </article>
+
+          <article class="lab-card" aria-labelledby="cache-heading">
+            <div class="card-head"><span class="card-number">06 / PERFORMANCE</span><span class="feature-symbol"
+                aria-hidden="true">◫</span></div>
+            <h3 id="cache-heading">Browser Cache</h3>
+            <p class="card-copy">以同一網址請求 CSS 兩次，觀察 max-age、Expires 與瀏覽器的資源計時資訊。</p>
+            <code class="endpoint">GET /lab/cache/cache.css</code>
+            <button class="button button-action" id="run-cache" type="button">執行兩次快取測試 <span
+                aria-hidden="true">→</span></button>
+            <div class="result-panel" id="result-cache" role="status" aria-live="polite">
+              <p class="result-placeholder">測試使用同一個新網址，第二次可由快取提供。</p>
+            </div>
+          </article>
+
+          <article class="lab-card lab-card-wide" aria-labelledby="error-heading">
+            <div class="card-head"><span class="card-number">07 / ERROR HANDLING</span><span class="feature-symbol"
+                aria-hidden="true">!</span></div>
+            <h3 id="error-heading">Custom Error Page &amp; Static Files</h3>
+            <p class="card-copy">請求不存在的資源，驗證自訂 404 頁仍保留 HTTP 404 狀態；也可以直接造訪 Nginx 提供的靜態文件。</p>
+            <div class="wide-controls">
+              <code class="endpoint">GET /__nginx_lab_missing_resource</code>
+              <div class="button-pair"><button class="button button-action" id="run-not-found" type="button">測試 404
+                  <span aria-hidden="true">→</span></button><a class="button button-outline" href="/docs/">開啟靜態文件 ↗</a>
+              </div>
+            </div>
+            <div class="result-panel" id="result-not-found" role="status" aria-live="polite">
+              <p class="result-placeholder">自訂錯誤頁不應把 HTTP 404 改成 200。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="explain" aria-labelledby="explain-heading">
+        <div>
+          <p class="section-kicker">HOW IT WORKS</p>
+          <h2 id="explain-heading">真實環境，沒有假資料。</h2>
+          <p>所有結果都從目前執行中的 Nginx 與 Express 服務取得。網頁本身只是靜態檔案，無須安裝前端框架或額外套件。</p>
+        </div>
+        <div class="explain-links"><a href="/docs/">瀏覽靜態文件 <span aria-hidden="true">↗</span></a><a href="/api/info"
+            target="_blank" rel="noopener noreferrer">直接查看 JSON API <span aria-hidden="true">↗</span></a></div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>PROJECT 05 · NGINX STATIC &amp; REVERSE PROXY</span><span>Docker Compose / Node.js
+        / TypeScript / Vanilla JS</span></footer>
+  </div>
+</body>
+
+</html>

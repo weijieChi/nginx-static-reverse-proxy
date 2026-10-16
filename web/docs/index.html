@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<!--
+    Request：
+
+        GET /docs/
+
+    root：
+
+        /usr/share/nginx/html
+
+    Directory：
+
+        /usr/share/nginx/html/docs/
+
+    index：
+
+        index.html
+
+    最終：
+
+        /usr/share/nginx/html/docs/index.html
+-->
+
+<html lang="zh-Hant">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Docs
+    </title>
+
+    <!--
+        使用絕對 URI。
+
+        /assets/style.css
+
+        不會受到目前 /docs/ 路徑影響。
+    -->
+    <link
+        rel="stylesheet"
+        href="/assets/style.css"
+    >
+
+</head>
+
+<body>
+
+    <main class="container">
+
+        <h1>
+            Docs
+        </h1>
+
+        <p>
+            這是 /docs/ 的 index.html。
+        </p>
+
+        <p>
+            <a href="/docs/guide.html">
+                Guide
+            </a>
+        </p>
+
+        <p>
+            <a href="/">
+                回首頁
+            </a>
+        </p>
+
+    </main>
+
+</body>
+
+</html>
